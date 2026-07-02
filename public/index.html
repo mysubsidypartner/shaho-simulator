@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社会保険料 適正化シミュレーター</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="header__title">社会保険料 適正化シミュレーター</h1>
+      <p class="header__subtitle">Social Insurance Optimization Simulator</p>
+    </header>
+
+    <!-- Start -->
+    <section id="start-screen" class="card start-screen">
+      <p class="start-screen__desc">
+        会社・経営者情報をもとに、<br>
+        社会保険料の適正化シミュレーションを行います。
+      </p>
+      <button type="button" class="btn btn--start" id="btn-start">Start</button>
+    </section>
+
+    <!-- Form -->
+    <div id="form-container" class="is-hidden">
+      <div class="progress" aria-hidden="true">
+        <div class="progress__label">
+          <span id="progress-step">STEP 1/5</span>
+          <span id="progress-pct">20%</span>
+        </div>
+        <div class="progress__bar">
+          <div class="progress__fill" id="progress-fill" style="width: 20%"></div>
+        </div>
+      </div>
+
+      <form id="sim-form" class="card" novalidate>
+        <!-- Step 1: Location -->
+        <div class="step is-active" data-step="1">
+          <p class="step__badge">Q</p>
+          <h2 class="step__heading">会社についてお聞きします</h2>
+          <p class="field__label">会社所在地を選択してください</p>
+          <div class="option-grid" id="location-options">
+            <button type="button" class="option-btn" data-value="東京都">東京都</button>
+            <button type="button" class="option-btn" data-value="大阪府">大阪府</button>
+          </div>
+          <input type="hidden" id="location" name="location" value="">
+          <p class="field__error" id="error-location"></p>
+        </div>
+
+        <!-- Step 2: Birth date -->
+        <div class="step" data-step="2">
+          <p class="step__badge">Q</p>
+          <h2 class="step__heading">あなたについてお聞きします</h2>
+          <div class="field">
+            <label class="field__label">生年月日</label>
+            <div class="date-row">
+              <select class="field__select" id="birth-year" name="birthYear" aria-label="年"></select>
+              <select class="field__select" id="birth-month" name="birthMonth" aria-label="月"></select>
+              <select class="field__select" id="birth-day" name="birthDay" aria-label="日"></select>
+            </div>
+            <p class="field__error" id="error-birth"></p>
+          </div>
+        </div>
+
+        <!-- Step 3: Fiscal month -->
+        <div class="step" data-step="3">
+          <p class="step__badge">Q</p>
+          <h2 class="step__heading">会社についてお聞きします</h2>
+          <div class="field">
+            <label class="field__label" for="fiscal-month">決算月</label>
+            <select class="field__select" id="fiscal-month" name="fiscalMonth">
+              <option value="">選択してください</option>
+            </select>
+            <p class="field__error" id="error-fiscal"></p>
+          </div>
+        </div>
+
+        <!-- Step 4: Compensation -->
+        <div class="step" data-step="4">
+          <p class="step__badge">Q</p>
+          <h2 class="step__heading">あなたについてお聞きします</h2>
+          <div class="field">
+            <label class="field__label" for="monthly-pay">現在の役員報酬（月額）<span class="field__required">必須</span></label>
+            <input class="field__input" type="text" id="monthly-pay" name="monthlyPay" inputmode="numeric" placeholder="例: 300,000">
+            <p class="field__hint">大体の金額でかまいません</p>
+            <p class="field__error" id="error-monthly"></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="annual-bonus">年間役員賞与</label>
+            <input class="field__input" type="text" id="annual-bonus" name="annualBonus" inputmode="numeric" placeholder="例: 1,000,000">
+            <p class="field__hint">賞与がない場合は 0 または空欄</p>
+            <p class="field__error" id="error-bonus"></p>
+          </div>
+        </div>
+
+        <!-- Step 5: Company info -->
+        <div class="step" data-step="5">
+          <p class="step__badge">Q</p>
+          <h2 class="step__heading">あと一息です</h2>
+          <div class="field">
+            <label class="field__label" for="company-name">会社名<span class="field__required">必須</span></label>
+            <input class="field__input" type="text" id="company-name" name="companyName" autocomplete="organization">
+            <p class="field__error" id="error-company"></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="person-name">お名前<span class="field__required">必須</span></label>
+            <input class="field__input" type="text" id="person-name" name="personName" autocomplete="name">
+            <p class="field__error" id="error-name"></p>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button type="button" class="btn btn--back" id="btn-back">戻る</button>
+          <button type="button" class="btn btn--next" id="btn-next">次へ</button>
+          <button type="submit" class="btn btn--submit is-hidden" id="btn-submit">診断する</button>
+        </nav>
+      </form>
+    </div>
+
+    <!-- Results -->
+    <section id="results" class="results">
+      <h2 class="results__heading">診断結果</h2>
+      <p class="results__sub">シミュレーションが完了しました</p>
+
+      <div class="result-savings">
+        <p class="result-savings__label">年間削減額（見込み）</p>
+        <p>
+          <span class="result-savings__amount" id="result-savings">0</span>
+          <span class="result-savings__unit">円</span>
+        </p>
+      </div>
+
+      <div class="result-block">
+        <p class="result-block__title">現在の報酬構成</p>
+        <div class="result-row">
+          <span class="result-row__label">月額報酬</span>
+          <span class="result-row__value" id="current-monthly"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-row__label">年間役員賞与</span>
+          <span class="result-row__value" id="current-bonus"></span>
+        </div>
+        <div class="result-row result-row--total">
+          <span class="result-row__label">年間社会保険料（合計）</span>
+          <span class="result-row__value" id="current-total"></span>
+        </div>
+      </div>
+
+      <div class="result-block">
+        <p class="result-block__title">適正化後の報酬構成（推奨）</p>
+        <div class="result-row">
+          <span class="result-row__label">月額報酬</span>
+          <span class="result-row__value" id="opt-monthly"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-row__label">年間役員賞与</span>
+          <span class="result-row__value" id="opt-bonus"></span>
+        </div>
+        <div class="result-row result-row--total">
+          <span class="result-row__label">年間社会保険料（合計）</span>
+          <span class="result-row__value" id="opt-total"></span>
+        </div>
+      </div>
+
+      <div class="result-block">
+        <p class="result-block__title">保険料内訳（適正化後・年間）</p>
+        <div class="result-row">
+          <span class="result-row__label">健康保険料（介護保険料含む）</span>
+          <span class="result-row__value" id="breakdown-health"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-row__label">子ども・子育て支援金</span>
+          <span class="result-row__value" id="breakdown-child"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-row__label">厚生年金保険料</span>
+          <span class="result-row__value" id="breakdown-pension"></span>
+        </div>
+        <div class="result-row result-row--total">
+          <span class="result-row__label">うち被保険者負担分</span>
+          <span class="result-row__value" id="breakdown-half"></span>
+        </div>
+      </div>
+
+      <p class="result-meta" id="result-meta"></p>
+      <button type="button" class="btn btn--retry" id="btn-retry">もう一度診断する</button>
+    </section>
+  </div>
+
+  <script src="js/rates.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/form.js"></script>
+</body>
+</html>
