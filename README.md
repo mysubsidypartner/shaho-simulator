@@ -20,6 +20,7 @@ shaho-simulator/
 │   ├── Code.gs
 │   ├── config.gs
 │   ├── setup.gs
+│   ├── sheets.gs
 │   └── appsscript.json
 └── tools/
     └── extract-rates.py   # Excel → rates-data.json 変換

@@ -1,59 +1,59 @@
 # 本番セットアップ手順
 
-依頼者確認済みのシミュレーターを、回答ログ付きの本番環境にする手順です。
+**1つのスプレッドシートに GAS を入れて完結**する構成です。  
+回答ログも同じファイルの先頭シートに追記されます。
 
 ## 全体の流れ
 
 ```
-① GAS セットアップ（スプレッドシート + Web App）
-② config.js に GAS URL を設定
-③ GitHub に push → 自動で公開サイト更新
+① スプレッドシートを開く → 拡張機能 → Apps Script
+② gas/ のコードを貼り付け → setupAll 実行
+③ Web App をデプロイ → config.js に URL 設定 → push
 ```
 
 ---
 
-## ① GAS のセットアップ（約10分）
+## ① スプレッドシートに GAS をセットアップ
 
-### A. スクリプトプロジェクトを作成
+### A. スプレッドシートを開く
 
-1. [Google Apps Script](https://script.google.com/) を開く
-2. **新しいプロジェクト** を作成
-3. プロジェクト名を「社会保険料シミュレーター」などに変更
-4. `gas/` フォ下のファイルをすべてコピー
-   - `Code.gs`
-   - `config.gs`
-   - `setup.gs`
-   - `appsscript.json`（マニフェストは **プロジェクトの設定 → 「appsscript.json」マニフェスト ファイルをエディタで表示する」** を ON にしてから上書き）
+使うスプレッドシートを開きます（例）:
 
-### B. 初回セットアップを実行
+https://docs.google.com/spreadsheets/d/1_SuKZ7XUFqPX6-LhmeyjV8wQoVh21QVCGrWoAqsjD-I/edit
 
-1. GAS エディタで関数 `setupAll` を選択 → **実行**
-2. 初回は Google の承認画面が出るので許可
-3. **実行ログ** にスプレッドシート URL が表示される → ブックマークしておく
+> **1シート完結**: 先頭のシート（「シート1」など）に回答ログが書き込まれます。  
+> 余計なシートは削除して OK です。
 
-> 既存のスプレッドシートを使う場合は `bindSpreadsheet('スプレッドシートID')` を実行
+### B. Apps Script を開く
 
-### C. 動作テスト
+1. メニュー **拡張機能 → Apps Script**
+2. **既存のコードをすべて削除**
+3. **`gas/main.gs` の内容を1ファイルにすべて貼り付け**（ファイル名は `main.gs` または `コード.gs` で OK）
+4. `appsscript.json` を使う場合は **プロジェクトの設定** → **「appsscript.json」マニフェスト ファイルをエディタで表示する」** を ON にして上書き
 
-1. 関数 `testAppendRow` を実行
-2. スプレッドシートの「回答ログ」シートに1行追加されれば OK
+> ⚠️ `Code.gs` / `setup.gs` など複数ファイルに分けず、**main.gs 1つ**にまとめてください。  
+> 分けていると `appendSubmission_ is not defined` エラーになります。
 
-### D. Web App をデプロイ
+### C. 初回セットアップ
 
-1. **デプロイ → 新しいデプロイ**
-2. 種類: **ウェブアプリ**
-3. 設定:
-   - 説明: `回答ログ API v1`
-   - 実行ユーザー: **自分**
-   - アクセスできるユーザー: **全員**
-4. **デプロイ** をクリック
-5. 表示された **ウェブアプリ URL**（`https://script.google.com/macros/s/.../exec`）をコピー
+1. **スプレッドシートのタブを開いたまま** GAS エディタで `setupAll` を実行
+2. 先頭シートの1行目にヘッダーが作成される
+
+### D. 動作テスト
+
+1. `testAppendRow` を実行
+2. 先頭シートにテスト行が1行追加されれば OK
+
+### E. Web App をデプロイ
+
+1. **デプロイ → 新しいデプロイ → ウェブアプリ**
+2. 実行ユーザー: **自分**
+3. アクセス: **全員**
+4. 表示された URL（`.../exec`）をコピー
 
 ---
 
-## ② フロントエンドに GAS URL を設定
-
-`public/js/config.js` を開き、URL を貼り付けます。
+## ② config.js に GAS URL を設定
 
 ```javascript
 const APP_CONFIG = {
@@ -63,40 +63,28 @@ const APP_CONFIG = {
 
 ---
 
-## ③ GitHub に push（公開サイトを更新）
+## ③ GitHub に push
 
 ```bash
 cd shaho-simulator
-git add .
-git commit -m "Connect GAS endpoint for answer logging"
+git add public/js/config.js
+git commit -m "Set GAS endpoint"
 git push
 ```
 
-数分後、公開 URL が更新されます。
-
-**公開 URL:** https://mysubsidypartner.github.io/shaho-simulator/
+公開 URL: https://mysubsidypartner.github.io/shaho-simulator/
 
 ---
 
-## 動作確認チェックリスト
+## 構成イメージ
 
-- [ ] フォームを最後まで入力して「診断する」
-- [ ] 診断結果が表示される
-- [ ] スプレッドシートに1行追加される
-- [ ] 追加された行の内容が入力値と一致する
-
----
-
-## clasp を使う場合（任意）
-
-```bash
-npm install -g @google/clasp
-clasp login
-cd shaho-simulator
-cp .clasp.json.example .clasp.json
-# .clasp.json の scriptId を GAS プロジェクト ID に変更
-clasp push
 ```
+社会保険料シミュレーター 回答ログ.xlsx（Google スプレッドシート）
+├── シート1  ← 回答ログ（ヘッダー + 1送信1行）
+└── Apps Script（拡張機能）← Web App API
+```
+
+フォーム画面は GitHub Pages、データ保存はこのスプレッドシート1ファイルで完結します。
 
 ---
 
@@ -104,16 +92,6 @@ clasp push
 
 | 症状 | 対処 |
 |------|------|
-| スプレッドシートに行が追加されない | `config.js` の URL が正しいか確認。Web App を「全員」アクセスで再デプロイ |
-| `SHAHO_SPREADSHEET_ID が未設定` | `setupAll()` を再実行 |
-| ヘッダーが英語のまま | `回答ログ` シートを削除して `setupAll()` を再実行 |
-
----
-
-## 本番 URL
-
-| 用途 | URL |
-|------|-----|
-| シミュレーター（ユーザー向け） | https://mysubsidypartner.github.io/shaho-simulator/ |
-| 回答ログ | setupAll 実行時に作成されたスプレッドシート |
-| GAS 管理 | https://script.google.com/ |
+| スプレッドシートに行が追加されない | Web App を「全員」で再デプロイ。`config.js` の URL を確認 |
+| `スプレッドシートが見つかりません` | スプレッドシートを開いた状態で `setupAll` を実行 |
+| ヘッダーがずれている | 先頭シートのデータを消して `setupAll` を再実行 |

@@ -1,53 +1,41 @@
 // ============================================================
-// setup.gs — 初回セットアップ
+// setup.gs — 初回セットアップ（1シート完結）
 // ============================================================
 
 /**
- * 初回セットアップ（GAS エディタから1回実行）
- * - 回答ログ用スプレッドシートを新規作成（未設定時）
- * - ヘッダー行を作成
+ * 初回セットアップ
+ * 対象スプレッドシートの先頭シートにヘッダー行を作成するだけ
  */
 function setupAll() {
-  var props = PropertiesService.getScriptProperties();
-  var ssId = props.getProperty(SHAHO_CONFIG.PROP_KEYS.SPREADSHEET_ID);
-  var ss;
-
-  if (!ssId) {
-    ss = SpreadsheetApp.create('社会保険料シミュレーター 回答ログ');
-    ssId = ss.getId();
-    props.setProperty(SHAHO_CONFIG.PROP_KEYS.SPREADSHEET_ID, ssId);
-  } else {
-    ss = SpreadsheetApp.openById(ssId);
-  }
-
   setupSheetIfNeeded_();
+  var ss = getSpreadsheet_();
+  var sheet = getLogSheet_();
 
   return {
     ok: true,
-    spreadsheetId: ssId,
+    spreadsheetId: ss.getId(),
     spreadsheetUrl: ss.getUrl(),
-    message: 'セットアップ完了。次に Web App をデプロイし、URL を config.js に設定してください。'
+    sheetName: sheet.getName(),
+    message: 'セットアップ完了。Web App をデプロイし、URL を config.js に設定してください。'
   };
 }
 
-/**
- * 既存スプレッドシートにバインドする場合
- * @param {string} spreadsheetId
- */
-function bindSpreadsheet(spreadsheetId) {
-  var id = String(spreadsheetId || '').trim();
-  if (!id) {
-    throw new Error('スプレッドシート ID を指定してください');
-  }
-  SpreadsheetApp.openById(id);
-  PropertiesService.getScriptProperties().setProperty(
-    SHAHO_CONFIG.PROP_KEYS.SPREADSHEET_ID,
-    id
-  );
-  setupSheetIfNeeded_();
-  return {
-    ok: true,
-    spreadsheetId: id,
-    spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/' + id + '/edit'
-  };
+function testAppendRow() {
+  appendSubmission_({
+    location: '東京都',
+    birthDate: '1980-01-01',
+    ageCategory: '40歳以上',
+    fiscalMonth: 3,
+    monthlyPay: 300000,
+    annualBonus: 1000000,
+    annualRemuneration: 4600000,
+    companyName: 'テスト株式会社',
+    personName: '山田太郎',
+    resultTotal: 1380000,
+    resultOptimizedTotal: 998928,
+    resultSavings: 381072,
+    optimizedMonthlyPay: 73000,
+    optimizedAnnualBonus: 3724000,
+    resultBreakdown: '{}'
+  });
 }
