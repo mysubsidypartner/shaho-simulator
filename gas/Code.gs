@@ -32,11 +32,14 @@ function appendSubmission_(data) {
     data.fiscalMonth || '',
     data.monthlyPay || '',
     data.annualBonus || '',
+    data.annualRemuneration || '',
     String(data.companyName || ''),
     String(data.personName || ''),
     data.resultTotal || '',
     data.resultOptimizedTotal || '',
     data.resultSavings || '',
+    data.optimizedMonthlyPay || '',
+    data.optimizedAnnualBonus || '',
     String(data.resultBreakdown || '')
   ];
   sheet.appendRow(row);
@@ -94,11 +97,14 @@ function testAppendRow() {
     fiscalMonth: 3,
     monthlyPay: 300000,
     annualBonus: 1000000,
+    annualRemuneration: 4600000,
     companyName: 'テスト株式会社',
     personName: '山田太郎',
     resultTotal: 1380000,
     resultOptimizedTotal: 998928,
     resultSavings: 381072,
+    optimizedMonthlyPay: 73000,
+    optimizedAnnualBonus: 3724000,
     resultBreakdown: '{}'
   });
 }

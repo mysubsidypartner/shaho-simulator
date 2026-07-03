@@ -1,0 +1,6 @@
+{
+  "scriptId": "YOUR_SCRIPT_ID_HERE",
+  "rootDir": "gas",
+  "scriptExtensions": [".gs", ".html"],
+  "htmlExtensions": [".html"]
+}

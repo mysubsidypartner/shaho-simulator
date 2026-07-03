@@ -3,8 +3,7 @@
  */
 
 const CONFIG = {
-  /** GAS Web App のデプロイ URL（デプロイ後に設定） */
-  GAS_ENDPOINT: '',
+  GAS_ENDPOINT: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GAS_ENDPOINT) || '',
   TOTAL_STEPS: 5,
 };
 
@@ -207,11 +206,14 @@ function submitToGas(formData, simulation) {
     fiscalMonth: formData.fiscalMonth,
     monthlyPay: formData.monthlyPay,
     annualBonus: formData.annualBonus,
+    annualRemuneration: simulation.annualRemuneration,
     companyName: formData.companyName,
     personName: formData.personName,
     resultTotal: simulation.current.totalFull,
     resultOptimizedTotal: simulation.optimized.totalFull,
     resultSavings: simulation.savings,
+    optimizedMonthlyPay: simulation.optimized.monthlyPay,
+    optimizedAnnualBonus: simulation.optimized.annualBonus,
     resultBreakdown: JSON.stringify(simulation.optimized.breakdown),
   };
 

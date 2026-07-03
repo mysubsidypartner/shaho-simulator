@@ -13,11 +13,13 @@ shaho-simulator/
 │   └── js/
 │       ├── rates.js       # 料率・等級表（Excel から生成）
 │       ├── rates-data.json
+│       ├── config.js        # GAS エンドポイント設定
 │       ├── calc.js        # 計算ロジック
 │       └── form.js        # フォーム制御・送信
 ├── gas/             # Google Apps Script（回答ログ蓄積）
 │   ├── Code.gs
 │   ├── config.gs
+│   ├── setup.gs
 │   └── appsscript.json
 └── tools/
     └── extract-rates.py   # Excel → rates-data.json 変換
@@ -30,6 +32,12 @@ shaho-simulator/
 - 令和 8 年度の Excel 計算ロジックを踏襲した社会保険料計算
 - 年間報酬総額を維持したまま月額・賞与配分を最適化し、削減額を表示
 - GAS Web App 経由で Google スプレッドシートに回答を自動蓄積
+
+## 本番セットアップ
+
+**→ [DEPLOY.md](./DEPLOY.md) を参照**（GAS 連携・スプレッドシート蓄積の手順）
+
+公開 URL: https://mysubsidypartner.github.io/shaho-simulator/
 
 ## ローカル確認
 
