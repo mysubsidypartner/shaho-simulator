@@ -34,6 +34,28 @@ function lookupGrade(monthlyPay, grades) {
   return matched;
 }
 
+function getStandardMonthlyCandidates(table, minMonthly, maxMonthly) {
+  const seen = new Set();
+  const candidates = [];
+  for (const grade of table.grades) {
+    const m = grade.standardMonthly;
+    if (!m || m < minMonthly || m > maxMonthly || seen.has(m)) continue;
+    seen.add(m);
+    candidates.push(m);
+  }
+  return candidates.sort((a, b) => a - b);
+}
+
+function splitBonusPayments(totalBonus, count) {
+  const n = Math.max(1, Math.min(4, count));
+  const total = Number(totalBonus) || 0;
+  if (total <= 0) return [];
+  const base = Math.floor(total / n);
+  const payments = Array(n).fill(base);
+  payments[0] += total - base * n;
+  return payments;
+}
+
 function lookupPensionGrade(monthlyPay, grades) {
   const pensionGrades = getPensionGrades(grades);
   if (!pensionGrades.length) {
@@ -54,7 +76,9 @@ function getMonthlyPremiums(monthlyPay, table, withCare) {
     childFull: grade.childFull,
     childHalf: grade.childHalf,
     pensionFull: pensionGrade.pensionFull,
-    pensionHalf: pensionGrade.pensionHalf,
+    pensionHalf: isNumericPremium(pensionGrade.pensionHalf)
+      ? pensionGrade.pensionHalf
+      : pensionGrade.pensionFull / 2,
     withCare,
   };
 }
@@ -156,7 +180,7 @@ function calculate(input, table, withCare) {
       ...monthly,
       healthHalf: monthly.healthFull / 2,
       childHalf: monthly.childFull / 2,
-      pensionHalf: monthly.pensionFull / 2,
+      pensionHalf: isNumericPremium(monthly.pensionFull) ? Math.round(monthly.pensionFull / 2) : 0,
     },
     bonus,
     annualMonthly,
@@ -190,30 +214,41 @@ function getAgeCategory(birthDate, referenceDate = new Date()) {
 
 function optimizeCompensation({ monthlyPay, annualBonus, table, withCare }) {
   const annualTotal = monthlyPay * 12 + annualBonus;
-  const maxMonthly = Math.floor(annualTotal / 12);
-  let best = null;
+  const reductionTarget = Math.max(MIN_MONTHLY_PAY, monthlyPay - 100000);
+  const floorGrade = lookupGrade(reductionTarget, table.grades);
+  const floorMonthly = floorGrade.standardMonthly;
 
-  const candidates = new Set();
-  for (let m = MIN_MONTHLY_PAY; m <= maxMonthly; m += 1000) {
-    candidates.add(m);
-  }
-  for (const grade of table.grades) {
-    if (grade.minPay >= MIN_MONTHLY_PAY && grade.minPay <= maxMonthly) {
-      candidates.add(grade.minPay);
-    }
-  }
-
-  for (const m of candidates) {
-    const bonus = annualTotal - m * 12;
-    if (bonus < 0) continue;
+  const candidates = getStandardMonthlyCandidates(table, floorMonthly, monthlyPay);
+  if (!candidates.length) {
     const result = calculate(
-      { monthlyPay: m, bonusPayments: bonus > 0 ? [bonus] : [] },
+      { monthlyPay, bonusPayments: annualBonus > 0 ? [annualBonus] : [] },
       table,
       withCare
     );
-    if (!best || result.totalFull < best.result.totalFull) {
-      best = { monthlyPay: m, annualBonus: bonus, result };
+    return { monthlyPay, annualBonus, bonusPayments: result.bonusPayments, result };
+  }
+
+  let best = null;
+  for (const m of candidates) {
+    const bonus = annualTotal - m * 12;
+    if (bonus < 0) continue;
+
+    for (let splitCount = 1; splitCount <= 3; splitCount += 1) {
+      const bonusPayments = splitBonusPayments(bonus, splitCount);
+      const result = calculate({ monthlyPay: m, bonusPayments }, table, withCare);
+      if (!best || result.totalFull < best.result.totalFull) {
+        best = { monthlyPay: m, annualBonus: bonus, bonusPayments, result };
+      }
     }
+  }
+
+  if (!best) {
+    const result = calculate(
+      { monthlyPay, bonusPayments: annualBonus > 0 ? [annualBonus] : [] },
+      table,
+      withCare
+    );
+    return { monthlyPay, annualBonus, bonusPayments: result.bonusPayments, result };
   }
 
   return best;

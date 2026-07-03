@@ -185,6 +185,9 @@ function showResults(simulation) {
   $('#opt-monthly').textContent = formatYen(simulation.optimized.monthlyPay);
   $('#opt-bonus').textContent = formatYen(simulation.optimized.annualBonus);
   $('#opt-total').textContent = formatYen(simulation.optimized.totalFull);
+  $('#breakdown-health-label').textContent = simulation.withCare
+    ? '健康保険料（介護保険料含む）'
+    : '健康保険料';
   $('#breakdown-health').textContent = formatYen(simulation.optimized.breakdown.healthInsurance);
   $('#breakdown-child').textContent = formatYen(simulation.optimized.breakdown.childSupport);
   $('#breakdown-pension').textContent = formatYen(simulation.optimized.breakdown.pension);
