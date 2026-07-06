@@ -163,9 +163,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
+  z-index: 1;
 }
 
 .bonus-count-btn {
+  width: 100%;
   padding: 12px 14px;
   font-family: inherit;
   font-size: 0.875rem;
@@ -198,6 +201,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .bonus-amount-row__label {
@@ -262,6 +266,30 @@ body {
 
 .field__input::placeholder {
   color: #bbb;
+}
+
+/* compensation-grid 内の入力は field__input の width:100% を上書き */
+.compensation-grid .field__input.amount-input {
+  width: 72px;
+  flex: 0 0 72px;
+  max-width: 72px;
+}
+
+.compensation-grid .field__input.amount-input--sen {
+  width: 56px;
+  flex: 0 0 56px;
+  max-width: 56px;
+}
+
+.bonus-amount-row .field__input.amount-input {
+  flex: 1 1 auto;
+  width: 72px;
+  max-width: 96px;
+  min-width: 56px;
+}
+
+.bonus-amount-row .amount-unit {
+  flex-shrink: 0;
 }
 
 .field__error {
@@ -513,6 +541,13 @@ body {
 }
 
 /* Responsive */
+@media (max-width: 640px) {
+  .compensation-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
 @media (max-width: 480px) {
   .app {
     padding: 32px 16px 64px;
@@ -529,6 +564,12 @@ body {
   .compensation-grid {
     grid-template-columns: 1fr;
     gap: 28px;
+  }
+
+  .bonus-count-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
   .option-grid {

@@ -75,6 +75,7 @@ function updateBonusFields(count) {
   for (let i = 1; i <= 3; i += 1) {
     const row = document.querySelector(`label[for="bonus-${i}"]`);
     const input = $(`#bonus-${i}`);
+    if (!row || !input) continue;
     const active = count > 0 && i <= count;
     row.classList.toggle('is-disabled', !active);
     input.disabled = !active;
@@ -82,17 +83,26 @@ function updateBonusFields(count) {
   }
 }
 
-function initBonusCountButtons() {
-  $$('#bonus-count-options .bonus-count-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      $$('#bonus-count-options .bonus-count-btn').forEach((b) => b.classList.remove('is-selected'));
-      btn.classList.add('is-selected');
-      state.bonusCount = Number(btn.dataset.value);
-      $('#bonus-count').value = String(state.bonusCount);
-      updateBonusFields(state.bonusCount);
-    });
+function selectBonusCount(value) {
+  state.bonusCount = Number(value);
+  $$('#bonus-count-options .bonus-count-btn').forEach((b) => {
+    b.classList.toggle('is-selected', Number(b.dataset.value) === state.bonusCount);
   });
+  $('#bonus-count').value = String(state.bonusCount);
   updateBonusFields(state.bonusCount);
+}
+
+function initBonusCountButtons() {
+  const container = $('#bonus-count-options');
+  if (!container) return;
+
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('.bonus-count-btn');
+    if (!btn || !container.contains(btn)) return;
+    selectBonusCount(btn.dataset.value);
+  });
+
+  selectBonusCount(state.bonusCount);
 }
 
 function initLocationButtons() {
@@ -312,10 +322,7 @@ function resetForm() {
   $('#sim-form').reset();
   state.location = '';
   state.bonusCount = 1;
-  $$('#bonus-count-options .bonus-count-btn').forEach((b) => b.classList.remove('is-selected'));
-  $$('#bonus-count-options .bonus-count-btn[data-value="1"]').forEach((b) => b.classList.add('is-selected'));
-  $('#bonus-count').value = '1';
-  updateBonusFields(1);
+  selectBonusCount(1);
   state.step = 1;
   $$('#location-options .option-btn').forEach((b) => b.classList.remove('is-selected'));
   clearErrors();
