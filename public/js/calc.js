@@ -212,7 +212,22 @@ function getAgeCategory(birthDate, referenceDate = new Date()) {
   return getAge(birthDate, referenceDate) >= 40 ? '40歳以上' : '40歳未満';
 }
 
-function optimizeCompensation({ monthlyPay, annualBonus, table, withCare }) {
+function optimizeCompensation({
+  monthlyPay,
+  annualBonus,
+  bonusPayments,
+  table,
+  withCare,
+}) {
+  const payments = bonusPayments || (annualBonus > 0 ? [annualBonus] : []);
+  const currentResult = calculate({ monthlyPay, bonusPayments: payments }, table, withCare);
+  const currentBest = {
+    monthlyPay,
+    annualBonus,
+    bonusPayments: payments,
+    result: currentResult,
+  };
+
   const annualTotal = monthlyPay * 12 + annualBonus;
   const reductionTarget = Math.max(MIN_MONTHLY_PAY, monthlyPay - 100000);
   const floorGrade = lookupGrade(reductionTarget, table.grades);
@@ -220,12 +235,7 @@ function optimizeCompensation({ monthlyPay, annualBonus, table, withCare }) {
 
   const candidates = getStandardMonthlyCandidates(table, floorMonthly, monthlyPay);
   if (!candidates.length) {
-    const result = calculate(
-      { monthlyPay, bonusPayments: annualBonus > 0 ? [annualBonus] : [] },
-      table,
-      withCare
-    );
-    return { monthlyPay, annualBonus, bonusPayments: result.bonusPayments, result };
+    return currentBest;
   }
 
   let best = null;
@@ -234,21 +244,16 @@ function optimizeCompensation({ monthlyPay, annualBonus, table, withCare }) {
     if (bonus < 0) continue;
 
     for (let splitCount = 1; splitCount <= 3; splitCount += 1) {
-      const bonusPayments = splitBonusPayments(bonus, splitCount);
-      const result = calculate({ monthlyPay: m, bonusPayments }, table, withCare);
+      const splitPayments = splitBonusPayments(bonus, splitCount);
+      const result = calculate({ monthlyPay: m, bonusPayments: splitPayments }, table, withCare);
       if (!best || result.totalFull < best.result.totalFull) {
-        best = { monthlyPay: m, annualBonus: bonus, bonusPayments, result };
+        best = { monthlyPay: m, annualBonus: bonus, bonusPayments: splitPayments, result };
       }
     }
   }
 
-  if (!best) {
-    const result = calculate(
-      { monthlyPay, bonusPayments: annualBonus > 0 ? [annualBonus] : [] },
-      table,
-      withCare
-    );
-    return { monthlyPay, annualBonus, bonusPayments: result.bonusPayments, result };
+  if (!best || best.result.totalFull >= currentResult.totalFull) {
+    return currentBest;
   }
 
   return best;
@@ -304,11 +309,12 @@ function runSimulation(formData, referenceDate = new Date()) {
   const optimized = optimizeCompensation({
     monthlyPay,
     annualBonus,
+    bonusPayments: currentBonusPayments,
     table,
     withCare,
   });
 
-  const savings = current.totalFull - optimized.result.totalFull;
+  const savings = Math.max(0, current.totalFull - optimized.result.totalFull);
 
   return {
     birthDate,
@@ -328,5 +334,6 @@ function runSimulation(formData, referenceDate = new Date()) {
       annualBonus: optimized.annualBonus,
     },
     savings: Math.round(savings),
+    hasImprovement: optimized.result.totalFull < current.totalFull,
   };
 }
