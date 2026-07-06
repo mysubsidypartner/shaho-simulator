@@ -262,9 +262,12 @@ function runSimulation(formData, referenceDate = new Date()) {
 
   const monthlyPay = Number(formData.monthlyPay) || 0;
   const annualBonus = Number(formData.annualBonus) || 0;
+  const bonusCount = Number(formData.bonusCount) || 0;
+  const currentBonusPayments =
+    annualBonus > 0 && bonusCount > 0 ? splitBonusPayments(annualBonus, bonusCount) : [];
 
   const current = calculate(
-    { monthlyPay, bonusPayments: annualBonus > 0 ? [annualBonus] : [] },
+    { monthlyPay, bonusPayments: currentBonusPayments },
     table,
     withCare
   );
@@ -287,6 +290,7 @@ function runSimulation(formData, referenceDate = new Date()) {
     fiscalMonth: formData.fiscalMonth,
     monthlyPay,
     annualBonus,
+    bonusCount,
     annualRemuneration: monthlyPay * 12 + annualBonus,
     current,
     optimized: {

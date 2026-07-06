@@ -10,6 +10,7 @@ const CONFIG = {
 const state = {
   step: 1,
   location: '',
+  bonusCount: 1,
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -54,6 +55,17 @@ function initDateSelects() {
   for (let m = 1; m <= 12; m++) {
     fiscalSel.innerHTML += `<option value="${m}">${m}月</option>`;
   }
+}
+
+function initBonusCountButtons() {
+  $$('#bonus-count-options .option-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      $$('#bonus-count-options .option-btn').forEach((b) => b.classList.remove('is-selected'));
+      btn.classList.add('is-selected');
+      state.bonusCount = Number(btn.dataset.value);
+      $('#bonus-count').value = String(state.bonusCount);
+    });
+  });
 }
 
 function initLocationButtons() {
@@ -169,6 +181,7 @@ function collectFormData() {
     fiscalMonth: Number($('#fiscal-month').value),
     monthlyPay: normalizeNumber($('#monthly-pay').value),
     annualBonus: normalizeNumber($('#annual-bonus').value) || 0,
+    bonusCount: state.bonusCount,
     companyName: $('#company-name').value.trim(),
     personName: $('#person-name').value.trim(),
   };
@@ -194,8 +207,12 @@ function showResults(simulation) {
   $('#breakdown-half').textContent = formatYen(simulation.optimized.totalHalf);
 
   const careLabel = simulation.withCare ? '（介護保険料あり）' : '（介護保険料なし）';
+  const bonusLabel =
+    simulation.bonusCount > 0
+      ? `賞与${simulation.bonusCount}回払い`
+      : '賞与なし';
   $('#result-meta').textContent =
-    `${simulation.location} / ${simulation.ageCategory}${careLabel} / 年齢 ${simulation.age}歳 / 令和8年度料率\n` +
+    `${simulation.location} / ${simulation.ageCategory}${careLabel} / 年齢 ${simulation.age}歳 / ${bonusLabel} / 令和8年度料率\n` +
     '年間報酬総額を変えず、月額と賞与の配分を最適化した場合の試算です。';
 }
 
@@ -209,6 +226,7 @@ function submitToGas(formData, simulation) {
     fiscalMonth: formData.fiscalMonth,
     monthlyPay: formData.monthlyPay,
     annualBonus: formData.annualBonus,
+    bonusCount: formData.bonusCount,
     annualRemuneration: simulation.annualRemuneration,
     companyName: formData.companyName,
     personName: formData.personName,
@@ -233,6 +251,10 @@ function submitToGas(formData, simulation) {
 function resetForm() {
   $('#sim-form').reset();
   state.location = '';
+  state.bonusCount = 1;
+  $$('#bonus-count-options .option-btn').forEach((b) => b.classList.remove('is-selected'));
+  $$('#bonus-count-options .option-btn[data-value="1"]').forEach((b) => b.classList.add('is-selected'));
+  $('#bonus-count').value = '1';
   state.step = 1;
   $$('#location-options .option-btn').forEach((b) => b.classList.remove('is-selected'));
   clearErrors();
@@ -274,5 +296,6 @@ function bindEvents() {
 document.addEventListener('DOMContentLoaded', () => {
   initDateSelects();
   initLocationButtons();
+  initBonusCountButtons();
   bindEvents();
 });

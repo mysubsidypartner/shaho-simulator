@@ -410,6 +410,10 @@ body {
   display: none !important;
 }
 
+.option-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .app {
@@ -426,6 +430,10 @@ body {
 
   .option-grid {
     grid-template-columns: 1fr;
+  }
+
+  .option-grid--4 {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .nav {

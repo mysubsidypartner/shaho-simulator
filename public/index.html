@@ -92,6 +92,17 @@
             <p class="field__hint">賞与がない場合は 0 または空欄</p>
             <p class="field__error" id="error-bonus"></p>
           </div>
+          <div class="field">
+            <p class="field__label">賞与の支給回数</p>
+            <div class="option-grid option-grid--4" id="bonus-count-options">
+              <button type="button" class="option-btn is-selected" data-value="1">年1回</button>
+              <button type="button" class="option-btn" data-value="2">年2回</button>
+              <button type="button" class="option-btn" data-value="3">年3回</button>
+              <button type="button" class="option-btn" data-value="0">なし</button>
+            </div>
+            <p class="field__hint">Excel と同じ回数にすると計算結果が一致します（1回150万円超の場合に影響）</p>
+            <input type="hidden" id="bonus-count" name="bonusCount" value="1">
+          </div>
         </div>
 
         <!-- Step 5: Company info -->
