@@ -80,28 +80,52 @@
         <div class="step" data-step="4">
           <p class="step__badge">Q</p>
           <h2 class="step__heading">あなたについてお聞きします</h2>
-          <div class="field">
-            <label class="field__label" for="monthly-pay">現在の役員報酬（月額）<span class="field__required">必須</span></label>
-            <input class="field__input" type="text" id="monthly-pay" name="monthlyPay" inputmode="numeric" placeholder="例: 300,000">
-            <p class="field__hint">大体の金額でかまいません</p>
-            <p class="field__error" id="error-monthly"></p>
-          </div>
-          <div class="field">
-            <label class="field__label" for="annual-bonus">年間役員賞与</label>
-            <input class="field__input" type="text" id="annual-bonus" name="annualBonus" inputmode="numeric" placeholder="例: 1,000,000">
-            <p class="field__hint">賞与がない場合は 0 または空欄</p>
-            <p class="field__error" id="error-bonus"></p>
-          </div>
-          <div class="field">
-            <p class="field__label">賞与の支給回数</p>
-            <div class="option-grid option-grid--4" id="bonus-count-options">
-              <button type="button" class="option-btn is-selected" data-value="1">年1回</button>
-              <button type="button" class="option-btn" data-value="2">年2回</button>
-              <button type="button" class="option-btn" data-value="3">年3回</button>
-              <button type="button" class="option-btn" data-value="0">なし</button>
+          <p class="step__subheading">現在の役員報酬 ※大体でかまいません。</p>
+
+          <div class="compensation-grid">
+            <div class="compensation-col">
+              <p class="field__label">月収</p>
+              <div class="amount-row">
+                <input class="field__input amount-input" type="text" id="monthly-man" inputmode="numeric" placeholder="100" aria-label="月収（万円）">
+                <span class="amount-unit">万</span>
+                <input class="field__input amount-input amount-input--sen" type="text" id="monthly-sen" inputmode="numeric" placeholder="0" aria-label="月収（千円）">
+                <span class="amount-unit">千円</span>
+              </div>
+              <p class="field__error" id="error-monthly"></p>
             </div>
-            <p class="field__hint">Excel と同じ回数にすると計算結果が一致します（1回150万円超の場合に影響）</p>
-            <input type="hidden" id="bonus-count" name="bonusCount" value="1">
+
+            <div class="compensation-col">
+              <p class="field__label">賞与の回数</p>
+              <div class="bonus-count-list" id="bonus-count-options">
+                <button type="button" class="bonus-count-btn is-selected" data-value="1">年1回</button>
+                <button type="button" class="bonus-count-btn" data-value="2">年2回</button>
+                <button type="button" class="bonus-count-btn" data-value="3">年3回</button>
+                <button type="button" class="bonus-count-btn" data-value="0">なし</button>
+              </div>
+              <input type="hidden" id="bonus-count" name="bonusCount" value="1">
+            </div>
+
+            <div class="compensation-col">
+              <p class="field__label">賞与の金額</p>
+              <div class="bonus-amount-list">
+                <label class="bonus-amount-row" for="bonus-1">
+                  <span class="bonus-amount-row__label">1回目</span>
+                  <input class="field__input amount-input" type="text" id="bonus-1" inputmode="numeric" placeholder="100">
+                  <span class="amount-unit">万円</span>
+                </label>
+                <label class="bonus-amount-row is-disabled" for="bonus-2">
+                  <span class="bonus-amount-row__label">2回目</span>
+                  <input class="field__input amount-input" type="text" id="bonus-2" inputmode="numeric" placeholder="100" disabled>
+                  <span class="amount-unit">万円</span>
+                </label>
+                <label class="bonus-amount-row is-disabled" for="bonus-3">
+                  <span class="bonus-amount-row__label">3回目</span>
+                  <input class="field__input amount-input" type="text" id="bonus-3" inputmode="numeric" placeholder="100" disabled>
+                  <span class="amount-unit">万円</span>
+                </label>
+              </div>
+              <p class="field__error" id="error-bonus"></p>
+            </div>
           </div>
         </div>
 

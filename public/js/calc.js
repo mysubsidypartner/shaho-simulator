@@ -254,6 +254,33 @@ function optimizeCompensation({ monthlyPay, annualBonus, table, withCare }) {
   return best;
 }
 
+function normalizeBonusData({ bonusCount, bonusPayments, annualBonus }) {
+  const payments = (bonusPayments || []).map(Number).filter((n) => Number.isFinite(n) && n > 0);
+  let count = Number(bonusCount) || 0;
+  let total = Number(annualBonus) || 0;
+
+  if (!payments.length && total > 0) {
+    count = count > 0 ? count : 1;
+    const split = splitBonusPayments(total, count);
+    return {
+      bonusPayments: split,
+      bonusCount: count,
+      annualBonus: total,
+    };
+  }
+
+  if (payments.length && count <= 0) {
+    count = payments.length;
+  }
+
+  const sum = payments.reduce((s, n) => s + n, 0);
+  return {
+    bonusPayments: payments,
+    bonusCount: count,
+    annualBonus: sum || total,
+  };
+}
+
 function runSimulation(formData, referenceDate = new Date()) {
   const birthDate = `${formData.birthYear}-${String(formData.birthMonth).padStart(2, '0')}-${String(formData.birthDay).padStart(2, '0')}`;
   const ageCategory = getAgeCategory(birthDate, referenceDate);
@@ -261,10 +288,12 @@ function runSimulation(formData, referenceDate = new Date()) {
   const table = getRateTable(formData.location, ageCategory);
 
   const monthlyPay = Number(formData.monthlyPay) || 0;
-  const annualBonus = Number(formData.annualBonus) || 0;
-  const bonusCount = Number(formData.bonusCount) || 0;
-  const currentBonusPayments =
-    annualBonus > 0 && bonusCount > 0 ? splitBonusPayments(annualBonus, bonusCount) : [];
+  const bonus = normalizeBonusData({
+    bonusCount: formData.bonusCount,
+    bonusPayments: formData.bonusPayments,
+    annualBonus: formData.annualBonus,
+  });
+  const { bonusPayments: currentBonusPayments, bonusCount, annualBonus } = bonus;
 
   const current = calculate(
     { monthlyPay, bonusPayments: currentBonusPayments },

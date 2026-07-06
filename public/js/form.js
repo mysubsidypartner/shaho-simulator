@@ -57,15 +57,42 @@ function initDateSelects() {
   }
 }
 
+function parseManSen(manValue, senValue) {
+  const man = normalizeNumber(manValue);
+  const sen = senValue === '' || senValue == null ? 0 : normalizeNumber(senValue);
+  if (!Number.isFinite(man) || man < 0) return NaN;
+  if (!Number.isFinite(sen) || sen < 0) return NaN;
+  return man * 10000 + sen * 1000;
+}
+
+function parseMan(manValue) {
+  const man = normalizeNumber(manValue);
+  if (!Number.isFinite(man) || man < 0) return NaN;
+  return man * 10000;
+}
+
+function updateBonusFields(count) {
+  for (let i = 1; i <= 3; i += 1) {
+    const row = document.querySelector(`label[for="bonus-${i}"]`);
+    const input = $(`#bonus-${i}`);
+    const active = count > 0 && i <= count;
+    row.classList.toggle('is-disabled', !active);
+    input.disabled = !active;
+    if (!active) input.value = '';
+  }
+}
+
 function initBonusCountButtons() {
-  $$('#bonus-count-options .option-btn').forEach((btn) => {
+  $$('#bonus-count-options .bonus-count-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      $$('#bonus-count-options .option-btn').forEach((b) => b.classList.remove('is-selected'));
+      $$('#bonus-count-options .bonus-count-btn').forEach((b) => b.classList.remove('is-selected'));
       btn.classList.add('is-selected');
       state.bonusCount = Number(btn.dataset.value);
       $('#bonus-count').value = String(state.bonusCount);
+      updateBonusFields(state.bonusCount);
     });
   });
+  updateBonusFields(state.bonusCount);
 }
 
 function initLocationButtons() {
@@ -143,18 +170,31 @@ function validateStep(step) {
   }
 
   if (step === 4) {
-    const monthly = normalizeNumber($('#monthly-pay').value);
-    const bonus = normalizeNumber($('#annual-bonus').value);
-    if (!$('#monthly-pay').value.trim()) {
-      $('#error-monthly').textContent = '月額報酬を入力してください';
+    const monthly = parseManSen($('#monthly-man').value, $('#monthly-sen').value);
+    const manFilled = $('#monthly-man').value.trim() !== '';
+    const senFilled = $('#monthly-sen').value.trim() !== '';
+
+    if (!manFilled && !senFilled) {
+      $('#error-monthly').textContent = '月収を入力してください';
       valid = false;
     } else if (!Number.isFinite(monthly) || monthly <= 0) {
       $('#error-monthly').textContent = '正しい金額を入力してください';
       valid = false;
     }
-    if ($('#annual-bonus').value.trim() && (!Number.isFinite(bonus) || bonus < 0)) {
-      $('#error-bonus').textContent = '正しい金額を入力してください';
-      valid = false;
+
+    if (state.bonusCount > 0) {
+      let bonusValid = true;
+      for (let i = 1; i <= state.bonusCount; i += 1) {
+        const amount = parseMan($(`#bonus-${i}`).value);
+        if (!Number.isFinite(amount) || amount < 0) {
+          bonusValid = false;
+          break;
+        }
+      }
+      if (!bonusValid) {
+        $('#error-bonus').textContent = '賞与の金額を入力してください';
+        valid = false;
+      }
     }
   }
 
@@ -172,16 +212,36 @@ function validateStep(step) {
   return valid;
 }
 
+function collectBonusPayments() {
+  const payments = [];
+  const limit = state.bonusCount > 0 ? state.bonusCount : 3;
+  for (let i = 1; i <= limit; i += 1) {
+    const input = $(`#bonus-${i}`);
+    if (!input || input.disabled) continue;
+    const value = input.value;
+    if (!value.trim()) continue;
+    const amount = parseMan(value);
+    if (Number.isFinite(amount) && amount > 0) payments.push(amount);
+  }
+  return payments;
+}
+
 function collectFormData() {
+  const bonusPayments = collectBonusPayments();
+  let bonusCount = state.bonusCount;
+  if (bonusCount <= 0 && bonusPayments.length > 0) {
+    bonusCount = bonusPayments.length;
+  }
   return {
     location: state.location,
     birthYear: Number($('#birth-year').value),
     birthMonth: Number($('#birth-month').value),
     birthDay: Number($('#birth-day').value),
     fiscalMonth: Number($('#fiscal-month').value),
-    monthlyPay: normalizeNumber($('#monthly-pay').value),
-    annualBonus: normalizeNumber($('#annual-bonus').value) || 0,
-    bonusCount: state.bonusCount,
+    monthlyPay: parseManSen($('#monthly-man').value, $('#monthly-sen').value),
+    bonusPayments,
+    annualBonus: bonusPayments.reduce((sum, n) => sum + n, 0),
+    bonusCount,
     companyName: $('#company-name').value.trim(),
     personName: $('#person-name').value.trim(),
   };
@@ -227,6 +287,7 @@ function submitToGas(formData, simulation) {
     monthlyPay: formData.monthlyPay,
     annualBonus: formData.annualBonus,
     bonusCount: formData.bonusCount,
+    bonusPayments: JSON.stringify(formData.bonusPayments),
     annualRemuneration: simulation.annualRemuneration,
     companyName: formData.companyName,
     personName: formData.personName,
@@ -252,9 +313,10 @@ function resetForm() {
   $('#sim-form').reset();
   state.location = '';
   state.bonusCount = 1;
-  $$('#bonus-count-options .option-btn').forEach((b) => b.classList.remove('is-selected'));
-  $$('#bonus-count-options .option-btn[data-value="1"]').forEach((b) => b.classList.add('is-selected'));
+  $$('#bonus-count-options .bonus-count-btn').forEach((b) => b.classList.remove('is-selected'));
+  $$('#bonus-count-options .bonus-count-btn[data-value="1"]').forEach((b) => b.classList.add('is-selected'));
   $('#bonus-count').value = '1';
+  updateBonusFields(1);
   state.step = 1;
   $$('#location-options .option-btn').forEach((b) => b.classList.remove('is-selected'));
   clearErrors();

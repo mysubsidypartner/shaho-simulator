@@ -118,6 +118,104 @@ body {
   letter-spacing: 0.04em;
 }
 
+.step__subheading {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: -20px 0 28px;
+}
+
+/* Step 4: compensation (reference layout) */
+.compensation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.compensation-col {
+  min-width: 0;
+}
+
+.amount-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.amount-input {
+  width: 72px;
+  text-align: right;
+  padding: 10px 12px;
+}
+
+.amount-input--sen {
+  width: 56px;
+}
+
+.amount-unit {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.bonus-count-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bonus-count-btn {
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.bonus-count-btn:hover {
+  border-color: var(--accent);
+}
+
+.bonus-count-btn.is-selected {
+  border-color: var(--accent);
+  background: #f0ede6;
+}
+
+.bonus-amount-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bonus-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bonus-amount-row__label {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  width: 3.5em;
+  flex-shrink: 0;
+}
+
+.bonus-amount-row.is-disabled {
+  opacity: 0.4;
+}
+
+.bonus-amount-row.is-disabled .field__input {
+  background: #f5f2eb;
+  cursor: not-allowed;
+}
+
 /* Form elements */
 .field {
   margin-bottom: 24px;
@@ -426,6 +524,11 @@ body {
 
   .date-row {
     grid-template-columns: 1fr;
+  }
+
+  .compensation-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
   }
 
   .option-grid {
