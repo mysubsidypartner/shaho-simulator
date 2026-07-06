@@ -272,8 +272,7 @@ function showResults(simulation) {
       ? `賞与${simulation.bonusCount}回払い`
       : '賞与なし';
   $('#result-meta').textContent =
-    `${simulation.location} / ${simulation.ageCategory}${careLabel} / 年齢 ${simulation.age}歳 / ${bonusLabel} / 令和8年度料率\n` +
-    '年間報酬総額を変えず、月額と賞与の配分を最適化した場合の試算です。';
+    `${simulation.location} / ${simulation.ageCategory}${careLabel} / 年齢 ${simulation.age}歳 / ${bonusLabel} / 令和8年度料率`;
 }
 
 function submitToGas(formData, simulation) {
