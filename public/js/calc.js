@@ -194,7 +194,7 @@ function calculate(input, table, withCare) {
       pension: Math.round(annualTotal.pensionFull),
       healthInsuranceHalf: Math.round(annualTotal.healthFull / 2),
       childSupportHalf: Math.round(annualTotal.childFull / 2),
-      pensionHalf: Math.round(annualTotal.pensionHalf / 2),
+      pensionHalf: Math.round(annualTotal.pensionFull / 2),
     },
   };
 }
@@ -221,7 +221,7 @@ function optimizeCompensation({
 }) {
   const payments = bonusPayments || (annualBonus > 0 ? [annualBonus] : []);
   const currentResult = calculate({ monthlyPay, bonusPayments: payments }, table, withCare);
-  const currentBest = {
+  let best = {
     monthlyPay,
     annualBonus,
     bonusPayments: payments,
@@ -235,10 +235,9 @@ function optimizeCompensation({
 
   const candidates = getStandardMonthlyCandidates(table, floorMonthly, monthlyPay);
   if (!candidates.length) {
-    return currentBest;
+    return best;
   }
 
-  let best = null;
   for (const m of candidates) {
     const bonus = annualTotal - m * 12;
     if (bonus < 0) continue;
@@ -246,14 +245,10 @@ function optimizeCompensation({
     for (let splitCount = 1; splitCount <= 3; splitCount += 1) {
       const splitPayments = splitBonusPayments(bonus, splitCount);
       const result = calculate({ monthlyPay: m, bonusPayments: splitPayments }, table, withCare);
-      if (!best || result.totalFull < best.result.totalFull) {
+      if (result.totalFull < best.result.totalFull) {
         best = { monthlyPay: m, annualBonus: bonus, bonusPayments: splitPayments, result };
       }
     }
-  }
-
-  if (!best || best.result.totalFull >= currentResult.totalFull) {
-    return currentBest;
   }
 
   return best;
