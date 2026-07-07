@@ -70,7 +70,7 @@ function upgradeLogHeadersIfNeeded_(sheet) {
   }
 
   sheet.insertColumnsAfter(6, 4);
-  sheet.getRange(1, 7, 1, 10).setValues([['賞与回数', '賞与1回目', '賞与2回目', '賞与3回目']]);
+  sheet.getRange(1, 7, 1, 4).setValues([['賞与回数', '賞与1回目', '賞与2回目', '賞与3回目']]);
   sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
 }
 
