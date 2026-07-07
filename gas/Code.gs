@@ -24,6 +24,7 @@ function doGet(e) {
 function appendSubmission_(data) {
   setupSheetIfNeeded_();
   var sheet = getLogSheet_();
+  var payments = parseBonusPayments_(data);
   var row = [
     Utilities.formatDate(new Date(), SHAHO_CONFIG.TIMEZONE, 'yyyy-MM-dd HH:mm:ss'),
     String(data.location || ''),
@@ -31,6 +32,10 @@ function appendSubmission_(data) {
     String(data.ageCategory || ''),
     data.fiscalMonth || '',
     data.monthlyPay || '',
+    data.bonusCount != null && data.bonusCount !== '' ? data.bonusCount : '',
+    payments[0] || '',
+    payments[1] || '',
+    payments[2] || '',
     data.annualBonus || '',
     data.annualRemuneration || '',
     String(data.companyName || ''),

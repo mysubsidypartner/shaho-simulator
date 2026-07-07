@@ -37,11 +37,50 @@ function getLogSheet_() {
   return sheets[0];
 }
 
+function parseBonusPayments_(data) {
+  var payments = [];
+  if (!data || data.bonusPayments == null || data.bonusPayments === '') {
+    return payments;
+  }
+  if (typeof data.bonusPayments === 'string') {
+    try {
+      payments = JSON.parse(data.bonusPayments);
+    } catch (err) {
+      payments = [];
+    }
+  } else if (Array.isArray(data.bonusPayments)) {
+    payments = data.bonusPayments;
+  }
+  return payments
+    .map(function (value) { return Number(value); })
+    .filter(function (value) { return Number.isFinite(value) && value > 0; });
+}
+
+function upgradeLogHeadersIfNeeded_(sheet) {
+  if (sheet.getLastRow() === 0) {
+    return;
+  }
+  var lastCol = sheet.getLastColumn();
+  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  if (headers.indexOf('賞与回数') >= 0) {
+    return;
+  }
+  if (headers.indexOf('月額報酬') < 0) {
+    return;
+  }
+
+  sheet.insertColumnsAfter(6, 4);
+  sheet.getRange(1, 7, 1, 10).setValues([['賞与回数', '賞与1回目', '賞与2回目', '賞与3回目']]);
+  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+}
+
 function setupSheetIfNeeded_() {
   var sheet = getLogSheet_();
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(SHAHO_CONFIG.LOG_HEADERS);
     sheet.setFrozenRows(1);
     sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+    return;
   }
+  upgradeLogHeadersIfNeeded_(sheet);
 }

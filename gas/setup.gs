@@ -27,15 +27,17 @@ function testAppendRow() {
     ageCategory: '40歳以上',
     fiscalMonth: 3,
     monthlyPay: 300000,
+    bonusCount: 2,
+    bonusPayments: [500000, 500000],
     annualBonus: 1000000,
     annualRemuneration: 4600000,
     companyName: 'テスト株式会社',
     personName: '山田太郎',
     resultTotal: 1380000,
-    resultOptimizedTotal: 998928,
-    resultSavings: 381072,
-    optimizedMonthlyPay: 73000,
-    optimizedAnnualBonus: 3724000,
+    resultOptimizedTotal: 1251900,
+    resultSavings: 128100,
+    optimizedMonthlyPay: 200000,
+    optimizedAnnualBonus: 2200000,
     resultBreakdown: '{}'
   });
 }
