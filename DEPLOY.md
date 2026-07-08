@@ -27,17 +27,17 @@ https://docs.google.com/spreadsheets/d/1_SuKZ7XUFqPX6-LhmeyjV8wQoVh21QVCGrWoAqsj
 ### B. Apps Script を開く
 
 1. メニュー **拡張機能 → Apps Script**
-2. **既存のコードをすべて削除**
-3. **`gas/main.gs` の内容を1ファイルにすべて貼り付け**（ファイル名は `main.gs` または `コード.gs` で OK）
+2. **既存の `.gs` ファイルをすべて削除**（`Code.gs` / `config.gs` など分割版が残っている場合も含む）
+3. ファイルを **1つだけ** 作成し、**`gas/main.gs` の内容をすべて貼り付け**（ファイル名は `main.gs` または `コード.gs` で OK）
 4. `appsscript.json` を使う場合は **プロジェクトの設定** → **「appsscript.json」マニフェスト ファイルをエディタで表示する」** を ON にして上書き
 
-> ⚠️ `Code.gs` / `setup.gs` など複数ファイルに分けず、**main.gs 1つ**にまとめてください。  
-> 分けていると `appendSubmission_ is not defined` エラーになります。
+> ⚠️ **`main.gs` 1ファイルのみ** を使ってください。複数ファイルに分けると関数が重複し、ログの列ずれや `appendSubmission_ is not defined` の原因になります。
 
 ### C. 初回セットアップ
 
 1. **スプレッドシートのタブを開いたまま** GAS エディタで `setupAll` を実行
-2. 先頭シートの1行目にヘッダーが作成される
+2. 先頭シートの1行目にヘッダー（20列）が作成される
+3. 既存シートでヘッダーがずれている場合は `repairLogSheet` を実行
 
 ### D. 動作テスト
 
@@ -94,4 +94,4 @@ git push
 |------|------|
 | スプレッドシートに行が追加されない | Web App を「全員」で再デプロイ。`config.js` の URL を確認 |
 | `スプレッドシートが見つかりません` | スプレッドシートを開いた状態で `setupAll` を実行 |
-| ヘッダーがずれている | 先頭シートのデータを消して `setupAll` を再実行 |
+| ヘッダーがずれている | `repairLogSheet` を実行（K〜N 列の空列を削除して1行目を20列に揃える） |

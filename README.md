@@ -17,10 +17,7 @@ shaho-simulator/
 │       ├── calc.js        # 計算ロジック
 │       └── form.js        # フォーム制御・送信
 ├── gas/             # Google Apps Script（回答ログ蓄積）
-│   ├── Code.gs
-│   ├── config.gs
-│   ├── setup.gs
-│   ├── sheets.gs
+│   ├── main.gs            # ★ これ1ファイルだけ Apps Script に貼り付ける
 │   └── appsscript.json
 └── tools/
     └── extract-rates.py   # Excel → rates-data.json 変換
