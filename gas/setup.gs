@@ -16,7 +16,21 @@ function setupAll() {
     spreadsheetId: ss.getId(),
     spreadsheetUrl: ss.getUrl(),
     sheetName: sheet.getName(),
+    headerColumns: SHAHO_CONFIG.LOG_HEADERS.length,
     message: 'セットアップ完了。Web App をデプロイし、URL を config.js に設定してください。'
+  };
+}
+
+function resetLogHeaders() {
+  var sheet = getLogSheet_();
+  upgradeLogHeadersIfNeeded_(sheet);
+  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setValues([SHAHO_CONFIG.LOG_HEADERS]);
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+  return {
+    ok: true,
+    columns: SHAHO_CONFIG.LOG_HEADERS.length,
+    headers: SHAHO_CONFIG.LOG_HEADERS
   };
 }
 

@@ -60,7 +60,25 @@ function setupAll() {
     spreadsheetId: ss.getId(),
     spreadsheetUrl: ss.getUrl(),
     sheetName: sheet.getName(),
+    headerColumns: SHAHO_CONFIG.LOG_HEADERS.length,
     message: 'セットアップ完了。Web App をデプロイしてください。'
+  };
+}
+
+/**
+ * 1行目のヘッダーを最新定義に揃える（列ずれ修復用）
+ * スプレッドシートを開いた状態で1回実行してください。
+ */
+function resetLogHeaders() {
+  var sheet = getLogSheet_();
+  upgradeLogHeadersIfNeeded_(sheet);
+  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setValues([SHAHO_CONFIG.LOG_HEADERS]);
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+  return {
+    ok: true,
+    columns: SHAHO_CONFIG.LOG_HEADERS.length,
+    headers: SHAHO_CONFIG.LOG_HEADERS
   };
 }
 
