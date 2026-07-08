@@ -23,15 +23,18 @@ function setupAll() {
 
 function resetLogHeaders() {
   var sheet = getLogSheet_();
-  upgradeLogHeadersIfNeeded_(sheet);
-  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setValues([SHAHO_CONFIG.LOG_HEADERS]);
-  sheet.setFrozenRows(1);
-  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+  var removedGap = repairHeaderGap_(sheet);
+  applyLogHeaders_(sheet);
   return {
     ok: true,
     columns: SHAHO_CONFIG.LOG_HEADERS.length,
+    removedGap: removedGap,
     headers: SHAHO_CONFIG.LOG_HEADERS
   };
+}
+
+function repairLogSheet() {
+  return resetLogHeaders();
 }
 
 function testAppendRow() {

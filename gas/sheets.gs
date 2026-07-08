@@ -56,6 +56,27 @@ function parseBonusPayments_(data) {
     .filter(function (value) { return Number.isFinite(value) && value > 0; });
 }
 
+function repairHeaderGap_(sheet) {
+  if (sheet.getLastRow() === 0) {
+    return false;
+  }
+  var lastCol = Math.max(sheet.getLastColumn(), SHAHO_CONFIG.LOG_HEADERS.length);
+  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var bonus3Idx = headers.indexOf('賞与3回目');
+  var annualIdx = headers.indexOf('年間役員賞与');
+  if (bonus3Idx >= 0 && annualIdx === bonus3Idx + 5) {
+    sheet.deleteColumns(bonus3Idx + 2, 4);
+    return true;
+  }
+  return false;
+}
+
+function applyLogHeaders_(sheet) {
+  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setValues([SHAHO_CONFIG.LOG_HEADERS]);
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+}
+
 function upgradeLogHeadersIfNeeded_(sheet) {
   if (sheet.getLastRow() === 0) {
     return;
@@ -63,6 +84,9 @@ function upgradeLogHeadersIfNeeded_(sheet) {
   var lastCol = sheet.getLastColumn();
   var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   if (headers.indexOf('賞与回数') >= 0) {
+    if (repairHeaderGap_(sheet)) {
+      applyLogHeaders_(sheet);
+    }
     return;
   }
   if (headers.indexOf('月額報酬') < 0) {
@@ -70,16 +94,13 @@ function upgradeLogHeadersIfNeeded_(sheet) {
   }
 
   sheet.insertColumnsAfter(6, 4);
-  sheet.getRange(1, 7, 1, 4).setValues([['賞与回数', '賞与1回目', '賞与2回目', '賞与3回目']]);
-  sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+  applyLogHeaders_(sheet);
 }
 
 function setupSheetIfNeeded_() {
   var sheet = getLogSheet_();
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(SHAHO_CONFIG.LOG_HEADERS);
-    sheet.setFrozenRows(1);
-    sheet.getRange(1, 1, 1, SHAHO_CONFIG.LOG_HEADERS.length).setFontWeight('bold');
+    applyLogHeaders_(sheet);
     return;
   }
   upgradeLogHeadersIfNeeded_(sheet);
